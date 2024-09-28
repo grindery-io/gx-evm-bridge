@@ -67,11 +67,6 @@ function App() {
       const signer = await ethersProvider.getSigner();
       const msg = {
         "types": {
-            "EIP712Domain": [
-                {"name": "name", "type": "string"},
-                {"name": "version", "type": "string"},
-                {"name": "chainId", "type": "uint256"},
-            ],
             "Delegate": [
                 {"name": "delegateAddress", "type": "address"},
                 {"name": "totp", "type": "uint256"},
@@ -89,13 +84,7 @@ function App() {
         },
       };
       setMessage('Please approve signature request');
-      const signature = await signer.signMessage(
-        ethers.getBytes(
-          ethers.toUtf8Bytes(
-            `${delegateAddress}${Math.floor(Date.now() / 1000 / 3600)}`
-          )
-        )
-      );
+      const signature = await signer.signTypedData(msg.domain, msg.types, msg.message);
       setMessage('Processing...');
       await safeApi(ethersProvider._network.chainId.toString(), 'delegates', {
         method: "post",
