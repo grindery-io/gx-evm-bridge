@@ -38,7 +38,7 @@ async function safeApi(
   options: Partial<RequestInit & { query: { [key: string]: string } }> = {}
 ) {
   const url = new URL(
-    `https://safe-client.safe.global/v1/chains/${chainId}/${path}`
+    `https://safe-client.safe.global/v2/chains/${chainId}/${path}`
   );
   const resp = await fetch(url.toString(), options);
   const body = await resp.json().catch(() => null);
@@ -65,6 +65,30 @@ function App() {
 
       const ethersProvider = new BrowserProvider(walletProvider as any);
       const signer = await ethersProvider.getSigner();
+      const msg = {
+        "types": {
+            "EIP712Domain": [
+                {"name": "name", "type": "string"},
+                {"name": "version", "type": "string"},
+                {"name": "chainId", "type": "uint256"},
+            ],
+            "Delegate": [
+                {"name": "delegateAddress", "type": "address"},
+                {"name": "totp", "type": "uint256"},
+            ],
+        },
+        "primaryType": "Delegate",
+        "domain": {
+            "name": "Safe Transaction Service",
+            "version": "1.0",
+            "chainId": ethersProvider._network.chainId,
+        },
+        "message": {
+            "delegateAddress": delegateAddress,
+            "totp": Math.floor(Date.now() / 1000 / 3600),
+        },
+      };
+      setMessage('Please approve signature request');
       const signature = await signer.signMessage(
         ethers.getBytes(
           ethers.toUtf8Bytes(
@@ -72,6 +96,7 @@ function App() {
           )
         )
       );
+      setMessage('Processing...');
       await safeApi(ethersProvider._network.chainId.toString(), 'delegates', {
         method: "post",
         headers: {
