@@ -73,6 +73,10 @@ function App() {
         )
       );
       await safeApi(ethersProvider._network.chainId.toString(), 'delegates', {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
           safe: safeAddress,
           delegator: address,
