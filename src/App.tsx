@@ -91,7 +91,6 @@ function App() {
         signature = ethers.concat([
           coder.encode(["uint256", "uint256"], [address, 65n]),
           "0x00",
-          coder.encode(["uint256"], [BigInt(ethers.dataLength(signature))]),
           ethers.dataSlice(coder.encode(["bytes"], [signature]), 32),
         ]);
       }
