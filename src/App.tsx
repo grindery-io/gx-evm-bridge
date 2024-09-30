@@ -90,7 +90,7 @@ function App() {
         const hash = ethers.TypedDataEncoder.hash(msg.domain, msg.types, msg.message);
         const contract = new ethers.Contract(safeAddress, ["function approveHash(bytes32 hashToApprove)"], signer);
         await contract.approveHash(hash).then(x => x.wait());
-        signature = ethers.AbiCoder.defaultAbiCoder().encode(["uint256", "uint256"], [address, 0n]) + "00";
+        signature = ethers.AbiCoder.defaultAbiCoder().encode(["uint256", "uint256"], [address, 0n]) + "01";
       } else {
         signature = await signer.signTypedData(msg.domain, msg.types, msg.message);
       }
