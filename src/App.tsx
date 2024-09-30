@@ -84,15 +84,15 @@ function App() {
         },
       };
       setMessage('Please approve signature request');
+      const hash = ethers.TypedDataEncoder.hash(msg.domain, msg.types, msg.message);
+      const isContract = ((await signer.provider.getCode(address)) || "0x") !== "0x";
       let signature = await signer.signTypedData(msg.domain, msg.types, msg.message);
-      const isEip1271 = ethers.dataLength(signature) !== 65 || ((await signer.provider.getCode(address)) || "0x") !== "0x";
-      if (isEip1271) {
-        const coder = ethers.AbiCoder.defaultAbiCoder()
-        signature = ethers.concat([
-          coder.encode(["uint256", "uint256"], [address, 65n]),
-          "0x00",
-          ethers.dataSlice(coder.encode(["bytes"], [signature]), 32),
-        ]);
+      if (isContract) {
+        const contract = new ethers.Contract(safeAddress, ["function approveHash(bytes32 hashToApprove)"], signer);
+        await contract.approveHash(hash).then(x => x.wait());
+        signature = ethers.AbiCoder.defaultAbiCoder().encode(["uint256", "uint256"], [address, 0n]) + "00";
+      } else {
+        signature = await signer.signTypedData(msg.domain, msg.types, msg.message);
       }
       setMessage('Processing...');
       await safeApi(ethersProvider._network.chainId.toString(), 'delegates', {
