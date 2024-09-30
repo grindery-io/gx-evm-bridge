@@ -61,30 +61,40 @@ function App() {
   function submit() {
     setMessage('Processing...');
     (async () => {
-      if (!isConnected) throw Error('User disconnected');
+      if (!isConnected || !address) throw Error('User disconnected');
 
       const ethersProvider = new BrowserProvider(walletProvider as any);
       const signer = await ethersProvider.getSigner();
       const msg = {
         "types": {
-            "Delegate": [
-                {"name": "delegateAddress", "type": "address"},
-                {"name": "totp", "type": "uint256"},
-            ],
+          "Delegate": [
+            { "name": "delegateAddress", "type": "address" },
+            { "name": "totp", "type": "uint256" },
+          ],
         },
         "primaryType": "Delegate",
         "domain": {
-            "name": "Safe Transaction Service",
-            "version": "1.0",
-            "chainId": ethersProvider._network.chainId,
+          "name": "Safe Transaction Service",
+          "version": "1.0",
+          "chainId": ethersProvider._network.chainId,
         },
         "message": {
-            "delegateAddress": delegateAddress,
-            "totp": Math.floor(Date.now() / 1000 / 3600),
+          "delegateAddress": delegateAddress,
+          "totp": Math.floor(Date.now() / 1000 / 3600),
         },
       };
       setMessage('Please approve signature request');
-      const signature = await signer.signTypedData(msg.domain, msg.types, msg.message);
+      let signature = await signer.signTypedData(msg.domain, msg.types, msg.message);
+      const isEip1271 = ethers.dataLength(signature) !== 65 || ((await signer.provider.getCode(address)) || "0x") !== "0x";
+      if (isEip1271) {
+        const coder = ethers.AbiCoder.defaultAbiCoder()
+        signature = ethers.concat([
+          coder.encode(["uint256", "uint256"], [address, 65n]),
+          "0x00",
+          coder.encode(["uint256"], [BigInt(ethers.dataLength(signature))]),
+          ethers.dataSlice(coder.encode(["bytes"], [signature]), 32),
+        ]);
+      }
       setMessage('Processing...');
       await safeApi(ethersProvider._network.chainId.toString(), 'delegates', {
         method: "post",
