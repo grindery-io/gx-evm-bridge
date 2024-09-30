@@ -38,7 +38,7 @@ async function safeApi(
   options: Partial<RequestInit & { query: { [key: string]: string } }> = {}
 ) {
   const url = new URL(
-    `https://safe-client.safe.global/v2/chains/${chainId}/${path}`
+    `https://safe-client.safe.global/v1/chains/${chainId}/${path}`
   );
   const resp = await fetch(url.toString(), options);
   const body = await resp.json().catch(() => null);
@@ -65,34 +65,22 @@ function App() {
 
       const ethersProvider = new BrowserProvider(walletProvider as any);
       const signer = await ethersProvider.getSigner();
-      const msg = {
-        "types": {
-          "Delegate": [
-            { "name": "delegateAddress", "type": "address" },
-            { "name": "totp", "type": "uint256" },
-          ],
-        },
-        "primaryType": "Delegate",
-        "domain": {
-          "name": "Safe Transaction Service",
-          "version": "1.0",
-          "chainId": ethersProvider._network.chainId,
-        },
-        "message": {
-          "delegateAddress": delegateAddress,
-          "totp": Math.floor(Date.now() / 1000 / 3600),
-        },
-      };
       setMessage('Please approve signature request');
-      const isContract = ((await signer.provider.getCode(address)) || "0x") !== "0x";
-      let signature: string;
-      if (isContract) {
-        const hash = ethers.TypedDataEncoder.hash(msg.domain, msg.types, msg.message);
-        const contract = new ethers.Contract(safeAddress, ["function approveHash(bytes32 hashToApprove)"], signer);
-        await contract.approveHash(hash).then(x => x.wait());
-        signature = ethers.AbiCoder.defaultAbiCoder().encode(["uint256", "uint256"], [address, 0n]) + "01";
-      } else {
-        signature = await signer.signTypedData(msg.domain, msg.types, msg.message);
+      let signature = await signer.signMessage(
+        ethers.getBytes(
+          ethers.toUtf8Bytes(
+            `${delegateAddress}${Math.floor(Date.now() / 1000 / 3600)}`
+          )
+        )
+      );
+      const isEip1271 = ethers.dataLength(signature) !== 65 || ((await signer.provider.getCode(address)) || "0x") !== "0x";
+      if (isEip1271) {
+        const coder = ethers.AbiCoder.defaultAbiCoder()
+        signature = ethers.concat([
+          coder.encode(["uint256", "uint256"], [address, 65n]),
+          "0x00",
+          ethers.dataSlice(coder.encode(["bytes"], [signature]), 32),
+        ]);
       }
       setMessage('Processing...');
       await safeApi(ethersProvider._network.chainId.toString(), 'delegates', {
