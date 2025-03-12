@@ -6,8 +6,9 @@ import {
 } from '@reown/appkit/react';
 import { EthersAdapter } from '@reown/appkit-adapter-ethers';
 import { mainnet, polygon } from '@reown/appkit/networks';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BrowserProvider, ethers } from 'ethers';
+import { CATERC20 } from './CATERC20';
 
 // 1. Get projectId
 const projectId = '0e81850aa66598baa09b4629ecbf3f11';
@@ -32,32 +33,22 @@ createAppKit({
   features: {},
 });
 
-async function safeApi(
-  chainId: string,
-  path: string,
-  options: Partial<RequestInit & { query: { [key: string]: string } }> = {}
-) {
-  const url = new URL(
-    `https://safe-client.safe.global/v1/chains/${chainId}/${path}`
-  );
-  const resp = await fetch(url.toString(), options);
-  const body = await resp.json().catch(() => null);
-  if (!resp.ok) {
-    throw new Error(
-      `Error when calling safe API (${path}): ${resp.status} - ${JSON.stringify(
-        body
-      )}`
-    );
-  }
-  return body;
-}
+const gxContract = new ethers.Contract('0x8730762Cad4a27816A467fAc54e3dd1E2e9617A1', CATERC20);
 
 function App() {
   const [message, setMessage] = useState('');
-  const [safeAddress, setSafeAddress] = useState('');
-  const [delegateAddress, setDelegateAddress] = useState('');
+  const [bridgeAmount, setBridgeAmount] = useState(0);
   const { address, isConnected } = useAppKitAccount();
   const { walletProvider } = useAppKitProvider('eip155');
+  const gx = useMemo(() => walletProvider ? gxContract.connect(new BrowserProvider(walletProvider as any)) as ethers.Contract : null, [walletProvider]);
+  const [balance, setBalance] = useState(-1n);
+  useEffect(() => {
+    setBalance(-1n);
+    if (!gx || !address) {
+      return;
+    }
+    gx.balanceOf(address).then((b) => setBalance(b));
+  }, [gx, address]);
   function submit() {
     setMessage('Processing...');
     (async () => {
@@ -110,27 +101,21 @@ function App() {
         <w3m-button />
         <w3m-network-button />
       </p>
-      <p>SAFE address</p>
+      <p>Bridge amount</p>
       <input
         type="text"
-        value={safeAddress}
-        onChange={(e) => setSafeAddress(e.currentTarget.value)}
+        value={bridgeAmount.toString()}
+        inputMode='numeric'
+        onChange={(e) => setBridgeAmount(parseInt(e.currentTarget.value, 10) || bridgeAmount)}
       />
-      <p>Delegate address</p>
-      <input
-        type="text"
-        value={delegateAddress}
-        onChange={(e) => setDelegateAddress(e.currentTarget.value)}
-      />
+      {balance >= 0 && <p>GX balance: ${ethers.formatEther(balance)}</p>}
       <p>
         <input
           type="button"
           value="Submit"
           onClick={submit}
           disabled={
-            !isConnected ||
-            !ethers.isAddress(safeAddress) ||
-            !ethers.isAddress(delegateAddress)
+            !isConnected || bridgeAmount <= 0 || balance < 0 || ethers.parseEther(bridgeAmount.toString()) > balance
           }
         />
       </p>
