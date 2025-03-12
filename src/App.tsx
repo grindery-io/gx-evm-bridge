@@ -3,9 +3,10 @@ import {
   createAppKit,
   useAppKitAccount,
   useAppKitProvider,
+  useAppKitNetwork
 } from '@reown/appkit/react';
 import { EthersAdapter } from '@reown/appkit-adapter-ethers';
-import { mainnet, polygon } from '@reown/appkit/networks';
+import { polygon, mainnet } from '@reown/appkit/networks';
 import { useEffect, useMemo, useState } from 'react';
 import { BrowserProvider, ethers } from 'ethers';
 import { CATERC20 } from './CATERC20';
@@ -39,59 +40,43 @@ function App() {
   const [message, setMessage] = useState('');
   const [bridgeAmount, setBridgeAmount] = useState(0);
   const { address, isConnected } = useAppKitAccount();
+  const network = useAppKitNetwork();
   const { walletProvider } = useAppKitProvider('eip155');
   const gx = useMemo(() => walletProvider ? gxContract.connect(new BrowserProvider(walletProvider as any)) as ethers.Contract : null, [walletProvider]);
   const [balance, setBalance] = useState(-1n);
+  const [targetChainId, setTargetChainId] = useState(2);
   useEffect(() => {
     setBalance(-1n);
     if (!gx || !address) {
       return;
     }
     gx.balanceOf(address).then((b) => setBalance(b));
-  }, [gx, address]);
+    setTargetChainId(network.chainId === 137 ? 2 : 5);
+  }, [gx, address, network.chainId]);
   function submit() {
     setMessage('Processing...');
     (async () => {
-      if (!isConnected || !address) throw Error('User disconnected');
-
-      const ethersProvider = new BrowserProvider(walletProvider as any);
-      const signer = await ethersProvider.getSigner();
-      setMessage('Please approve signature request');
-      let signature = await signer.signMessage(
-        ethers.getBytes(
-          ethers.toUtf8Bytes(
-            `${delegateAddress}${Math.floor(Date.now() / 1000 / 3600)}`
-          )
-        )
-      );
-      const isEip1271 = ethers.dataLength(signature) !== 65 || ((await signer.provider.getCode(address)) || "0x") !== "0x";
-      if (isEip1271) {
-        const coder = ethers.AbiCoder.defaultAbiCoder()
-        signature = ethers.concat([
-          coder.encode(["uint256", "uint256"], [address, 65n]),
-          "0x00",
-          ethers.dataSlice(coder.encode(["bytes"], [signature]), 32),
-        ]);
+      if (!isConnected || !address || !gx) throw Error('User disconnected');
+      const signer = await new BrowserProvider(walletProvider as any).getSigner();
+      const gxWithSigner = gx.connect(signer) as ethers.Contract;
+      const wormholeBridgeFee = await gxWithSigner.wormholeEstimatedFee(targetChainId);
+      const gasBalance = await gx.runner?.provider?.getBalance(address) ?? 0n;
+      if (wormholeBridgeFee > gasBalance) {
+        throw new Error(`Need at least ${ethers.formatEther(wormholeBridgeFee)} gas fee to pay for provider fee`);
       }
       setMessage('Processing...');
-      await safeApi(ethersProvider._network.chainId.toString(), 'delegates', {
-        method: "post",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          safe: safeAddress,
-          delegator: address,
-          delegate: delegateAddress,
-          label: 'Grindery Staff',
-          signature,
-        }),
-      });
+      await gxWithSigner.bridgeOut(
+        ethers.parseEther(bridgeAmount.toString()),
+        targetChainId,
+        ethers.zeroPadValue(address, 32),
+        ethers.zeroPadValue(await gx.getAddress(), 32),
+        { value: wormholeBridgeFee }
+      );
     })().then(
-      () => setMessage('Success!'),
+      () => setMessage('Transaction submitted, you should receive fund in a few minutes'),
       (e) => {
         console.error(e);
-        setMessage('Error: ' + e.toString());
+        setMessage(e.toString());
       }
     );
   }
@@ -108,11 +93,11 @@ function App() {
         inputMode='numeric'
         onChange={(e) => setBridgeAmount(parseInt(e.currentTarget.value, 10) || bridgeAmount)}
       />
-      {balance >= 0 && <p>GX balance: ${ethers.formatEther(balance)}</p>}
+      {balance >= 0 && <p>GX balance: {ethers.formatEther(balance)}</p>}
       <p>
         <input
           type="button"
-          value="Submit"
+          value={`Bridge to ${targetChainId === 2 ? "Ethereum" : "Polygon"}`}
           onClick={submit}
           disabled={
             !isConnected || bridgeAmount <= 0 || balance < 0 || ethers.parseEther(bridgeAmount.toString()) > balance
