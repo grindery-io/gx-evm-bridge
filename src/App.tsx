@@ -12,17 +12,17 @@ import { BrowserProvider, ethers } from 'ethers';
 import { CATERC20 } from './CATERC20';
 
 // 1. Get projectId
-const projectId = '0e81850aa66598baa09b4629ecbf3f11';
+const projectId = '3412d7ac48bc6355f82302fb11dd3679';
 
 // 2. Set the networks
 const networks = [polygon, mainnet];
 
 // 3. Create a metadata object - optional
 const metadata = {
-  name: 'My Website',
-  description: 'My Website description',
-  url: 'https://mywebsite.com', // origin must match your domain & subdomain
-  icons: ['https://avatars.mywebsite.com/'],
+  name: 'GX EVM Bridge',
+  description: 'GX EVM Bridge',
+  url: 'https://gx-evm-bridge.grindery.com/', // origin must match your domain & subdomain
+  icons: [],
 };
 
 // 4. Create a AppKit instance
