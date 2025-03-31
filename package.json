@@ -11,9 +11,12 @@
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "^4.1.0",
+    "@picocss/pico": "^2.1.1",
     "@reown/appkit": "^1.0.4",
     "@reown/appkit-adapter-ethers": "^1.0.4",
+    "@ton/core": "^0.60.1",
     "axios": "^1.7.7",
+    "buffer": "^6.0.3",
     "ethers": "^6.13.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
