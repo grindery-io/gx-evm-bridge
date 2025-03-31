@@ -36,7 +36,7 @@ createAppKit({
 });
 
 const gxContract = new ethers.Contract('0x8730762Cad4a27816A467fAc54e3dd1E2e9617A1', CATERC20);
-const bridgeContract = new ethers.Contract('0x9932EDE7E99b738fc577d9B8Cce3CD52E0A838Fb', ['function bridgeToTon(uint256 amount, int32 tonWorkchainId, bytes32 tonAccountId)'])
+const bridgeContract = new ethers.Contract('0xA50F0437F99a3Ce2E38561672d1eD1C4814970a3', ['function bridgeToTon(uint256 amount, int32 tonWorkchainId, bytes32 tonAccountId)'])
 
 function App() {
   const [message, setMessage] = useState('');
@@ -98,7 +98,7 @@ function App() {
     (async () => {
       if (!isConnected || !address || !gx) throw Error('User disconnected');
       const signer = await new BrowserProvider(walletProvider as any).getSigner();
-      const gxWithSigner = gx.attach("0xC3493D5787d4fF987d56855C64aAd60F382B5959").connect(signer) as ethers.Contract;
+      const gxWithSigner = gx.connect(signer) as ethers.Contract;
       const bridgeWithSigner = bridgeContract.connect(signer) as ethers.Contract;
       setMessage('Processing...');
       const amountWei = ethers.parseEther(bridgeAmount.toString())
