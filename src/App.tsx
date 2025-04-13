@@ -47,6 +47,7 @@ function App() {
   const gx = useMemo(() => walletProvider ? gxContract.connect(new BrowserProvider(walletProvider as any)) as ethers.Contract : null, [walletProvider]);
   const [balance, setBalance] = useState(-1n);
   const [targetChainId, setTargetChainId] = useState(2);
+  const [targetAddress, setTargetAddress] = useState("");
   const [tonAddress, setTonAddress] = useState("");
   const parsedTonAddress = useMemo(() => {
     try {
@@ -78,7 +79,7 @@ function App() {
       await gxWithSigner.bridgeOut(
         ethers.parseEther(bridgeAmount.toString()),
         targetChainId,
-        ethers.zeroPadValue(address, 32),
+        ethers.zeroPadValue(targetAddress || address, 32),
         ethers.zeroPadValue(await gx.getAddress(), 32),
         { value: wormholeBridgeFee }
       );
@@ -133,13 +134,20 @@ function App() {
           onChange={(e) => setBridgeAmount(parseInt(e.currentTarget.value, 10) || bridgeAmount)}
         />
         {balance >= 0 && <p>GX balance: {ethers.formatEther(balance)}</p>}
+        <p>Target address (optional)</p>
+        <input
+          type="text"
+          value={targetAddress}
+          placeholder='Leave empty to use same wallet address'
+          onChange={(e) => setTargetAddress(e.currentTarget.value)}
+        />
         <p>
           <input
             type="button"
             value={`Bridge to ${targetChainId === 2 ? "Ethereum" : "Polygon"}`}
             onClick={submit}
             disabled={
-              !isConnected || bridgeAmount <= 0 || balance < 0 || ethers.parseEther(bridgeAmount.toString()) > balance
+              !isConnected || bridgeAmount <= 0 || balance < 0 || ethers.parseEther(bridgeAmount.toString()) > balance || !!(targetAddress && !ethers.isAddress(targetAddress))
             }
           />
         </p>
