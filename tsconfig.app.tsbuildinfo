@@ -1,1 +1,1 @@
-{"root":["./src/App.tsx","./src/CATERC20.ts","./src/main.tsx","./src/vite-env.d.ts"],"version":"5.6.2"}
+{"root":["./src/app.tsx","./src/caterc20.ts","./src/main.tsx","./src/vite-env.d.ts","./src/components/mode-toggle.tsx","./src/components/theme-provider.tsx","./src/components/ui/button.tsx","./src/components/ui/dropdown-menu.tsx","./src/components/ui/input.tsx","./src/lib/utils.ts"],"version":"5.6.2"}

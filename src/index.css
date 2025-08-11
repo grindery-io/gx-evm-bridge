@@ -1,4 +1,138 @@
-w3m-button, w3m-network-button {
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+w3m-button,
+w3m-network-button {
   display: inline-block;
   vertical-align: middle;
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(214 9% 15%);
+  --muted: hsl(210 17% 98%);
+  --muted-foreground: hsl(210 6% 46%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(214 9% 15%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(214 9% 15%);
+  --border: hsl(216 14% 93%);
+  --input: hsl(210 6% 46%);
+  --primary: hsl(252 45% 37%);
+  --primary-foreground: hsl(94 100% 86%);
+  --secondary: hsl(210 17% 98%);
+  --secondary-foreground: hsl(214 9% 15%);
+  --accent: hsl(216 14% 93%);
+  --accent-foreground: hsl(210 7% 31%);
+  --destructive: hsl(347 82% 50%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --ring: hsl(252 45% 37%);
+  --hover-primary: hsl(214 9% 15%);
+  --hover-secondary: hsl(216 14% 93%);
+  --hover-destructive: hsl(347 82% 50%);
+  --success: hsl(134 75% 72%);
+  --hover-succes: hsl(
+    134 75% 72%
+  ); /* keeping your original key; see note below */
+  --border-destructive-50: hsl(349 61% 88%);
+  --bg-destructive-10: hsl(349 61% 88%);
+  --bg-muted-50: hsl(210 17% 98%);
+  --bg-accent-50: hsl(210 17% 98%);
+  --bg-muted-40: hsl(210 17% 98%);
+  --border-muted-40: hsl(216 14% 93%);
+  --neon-green: hsl(134 75% 72%);
+  --app-header: hsl(252 45% 37%);
+  --button-face: hsl(252 45% 37%);
+  --links: hsl(252 45% 37%);
+  --links-muted: hsl(214 12% 89%);
+  --inactive-foreground: hsl(214 12% 89%);
+}
+
+.dark {
+  --background: hsl(214 9% 15%);
+  --foreground: hsl(0 0% 100%);
+  --muted: hsl(210 9% 23%);
+  --muted-foreground: hsl(210 9% 71%);
+  --card: hsl(210 9% 23%);
+  --card-foreground: hsl(210 17% 98%);
+  --popover: hsl(210 9% 23%);
+  --popover-foreground: hsl(0 0% 100%);
+  --border: hsl(210 6% 46%);
+  --input: hsl(210 6% 46%);
+  --primary: hsl(94 100% 86%);
+  --primary-foreground: hsl(252 45% 37%);
+  --secondary: hsl(214 9% 15%);
+  --secondary-foreground: hsl(210 17% 98%);
+  --accent: hsl(210 9% 23%);
+  --accent-foreground: hsl(216 14% 93%);
+  --destructive: hsl(347 82% 50%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --ring: hsl(252 45% 37%);
+  --hover-primary: hsl(214 12% 89%);
+  --hover-secondary: hsl(210 9% 23%);
+  --hover-destructive: hsl(347 82% 50%);
+  --success: hsl(134 75% 72%);
+  --hover-succes: hsl(134 75% 72%);
+  --border-destructive-50: hsl(349 61% 88%);
+  --bg-destructive-10: hsl(349 61% 88%);
+  --bg-muted-50: hsl(210 7% 31%);
+  --bg-accent-50: hsl(210 9% 71%);
+  --bg-muted-40: hsl(210 9% 23%);
+  --border-muted-40: hsl(210 6% 46%);
+  --neon-green: hsl(134 75% 72%);
+  --app-header: hsl(214 9% 15%);
+  --button-face: hsl(94 100% 86%);
+  --links: hsl(94 100% 86%);
+  --links-muted: hsl(210 7% 31%);
+  --inactive-foreground: hsl(210 7% 31%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground min-h-screen;
+  }
 }
