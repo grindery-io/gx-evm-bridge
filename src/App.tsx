@@ -51,6 +51,10 @@ const providerUrls: Record<number, string> = {
   137: "https://polygon-mainnet.public.blastapi.io",
   1: "https://1rpc.io/eth"
 }
+const gasTokenNames: Record<number, string> = {
+  137: "POL",
+  1: "ETH"
+}
 
 function App() {
   const { theme } = useTheme();
@@ -116,7 +120,7 @@ function App() {
         throw new Error(
           `Need at least ${ethers.formatEther(
             wormholeBridgeFee
-          )} gas fee to pay for provider fee`
+          )} ${gasTokenNames[Number(network.chainId)] || "gas fee"} to pay for provider fee`
         );
       }
       setMessage("Processing...");
@@ -211,17 +215,17 @@ function App() {
               </div>
               {message && (
                 <div
-                  className={
-                    message.toLowerCase().includes("error")
+                  className={message.toLowerCase().includes("transaction submitted") ? "bg-success/10 p-4 rounded-lg" :
+                    (message.toLowerCase().includes("error")
                       ? "bg-destructive/10 p-4 rounded-lg break-all"
-                      : "bg-muted/10 p-4 rounded-lg"
+                      : "bg-muted/10 p-4 rounded-lg")
                   }
                 >
                   <p
-                    className={
-                      message.toLowerCase().includes("error")
+                    className={message.toLowerCase().includes("transaction submitted") ? "text-success text-sm text-center" :
+                      (message.toLowerCase().includes("error")
                         ? "text-destructive text-sm text-center"
-                        : "text-muted-foreground text-sm text-center"
+                        : "text-muted-foreground text-sm text-center")
                     }
                   >
                     {message}
