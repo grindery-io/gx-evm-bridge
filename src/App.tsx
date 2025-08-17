@@ -5,6 +5,7 @@ import {
   useAppKitProvider,
   useAppKitNetwork,
   useAppKitTheme,
+  Provider,
 } from "@reown/appkit/react";
 import { EthersAdapter } from "@reown/appkit-adapter-ethers";
 import { polygon, mainnet } from "@reown/appkit/networks";
@@ -58,7 +59,7 @@ function App() {
   const [bridgeAmount, setBridgeAmount] = useState(0);
   const { address, isConnected } = useAppKitAccount();
   const network = useAppKitNetwork();
-  const { walletProvider } = useAppKitProvider("eip155");
+  const { walletProvider } = useAppKitProvider<Provider>("eip155");
   const gx = useMemo(
     () =>
       walletProvider
@@ -88,6 +89,24 @@ function App() {
     setMessage("Processing...");
     (async () => {
       if (!isConnected || !address || !gx) throw Error("User disconnected");
+      const providerChainId = Number(await walletProvider.request({
+        "method": "eth_chainId",
+        "params": [],
+      }));
+      if (providerChainId !== network.chainId) {
+        try {
+          await walletProvider.request({
+            "method": "wallet_switchEthereumChain",
+            "params": [
+              {
+                chainId: "0x" + network.chainId?.toString(16)
+              }
+            ],
+          });
+        } catch (e) {
+          throw new Error("Please switch chain to source chain in your wallet")
+        }
+      }
       const signer = await new BrowserProvider(
         walletProvider as any
       ).getSigner();
