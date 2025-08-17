@@ -15,6 +15,7 @@ import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
 import { ModeToggle } from "./components/mode-toggle";
 import { useTheme } from "./components/theme-provider";
+import { JsonRpcProvider } from "ethers";
 
 // 1. Get projectId
 const projectId = "3412d7ac48bc6355f82302fb11dd3679";
@@ -45,6 +46,11 @@ const gxContract = new ethers.Contract(
   CATERC20
 );
 
+const providerUrls: Record<number, string> = {
+  137: "https://polygon-mainnet.public.blastapi.io",
+  1: "https://1rpc.io/eth"
+}
+
 function App() {
   const { theme } = useTheme();
   const { setThemeMode } = useAppKitTheme();
@@ -57,10 +63,10 @@ function App() {
     () =>
       walletProvider
         ? (gxContract.connect(
-            new BrowserProvider(walletProvider as any)
-          ) as ethers.Contract)
+          providerUrls[Number(network?.chainId)] ? new JsonRpcProvider(providerUrls[Number(network?.chainId)]) : new BrowserProvider(walletProvider as any)
+        ) as ethers.Contract)
         : null,
-    [walletProvider]
+    [walletProvider, network?.chainId]
   );
   const [balance, setBalance] = useState(-1n);
   const [targetChainId, setTargetChainId] = useState(2);
@@ -85,8 +91,7 @@ function App() {
       const signer = await new BrowserProvider(
         walletProvider as any
       ).getSigner();
-      const gxWithSigner = gx.connect(signer) as ethers.Contract;
-      const wormholeBridgeFee = await gxWithSigner.wormholeEstimatedFee(
+      const wormholeBridgeFee = await gx.wormholeEstimatedFee(
         targetChainId
       );
       const gasBalance = (await gx.runner?.provider?.getBalance(address)) ?? 0n;
@@ -98,6 +103,7 @@ function App() {
         );
       }
       setMessage("Processing...");
+      const gxWithSigner = gx.connect(signer) as ethers.Contract;
       await gxWithSigner.bridgeOut(
         ethers.parseEther(bridgeAmount.toString()),
         targetChainId,
@@ -215,9 +221,8 @@ function App() {
                   }
                   className="cursor-pointer"
                 >
-                  {`Bridge to ${
-                    network.chainId === 137 ? "Ethereum" : "Polygon"
-                  }`}
+                  {`Bridge to ${network.chainId === 137 ? "Ethereum" : "Polygon"
+                    }`}
                 </Button>
               </div>
             </>
