@@ -73,6 +73,8 @@ function App() {
   const [targetChainId, setTargetChainId] = useState(2);
   const [targetAddress, setTargetAddress] = useState("");
 
+  console.log({address, isConnected});
+
   useEffect(() => {
     setThemeMode(theme === "dark" ? "dark" : "light");
   }, [theme]);
@@ -213,7 +215,7 @@ function App() {
                 <div
                   className={
                     message.toLowerCase().includes("error")
-                      ? "bg-destructive/10 p-4 rounded-lg"
+                      ? "bg-destructive/10 p-4 rounded-lg break-all"
                       : "bg-muted/10 p-4 rounded-lg"
                   }
                 >
