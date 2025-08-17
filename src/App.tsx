@@ -103,7 +103,7 @@ function App() {
         );
       }
       setMessage("Processing...");
-      const gxWithSigner = gx.connect(signer) as ethers.Contract;
+      const gxWithSigner = gxContract.connect(signer) as ethers.Contract;
       await gxWithSigner.bridgeOut(
         ethers.parseEther(bridgeAmount.toString()),
         targetChainId,
