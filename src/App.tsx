@@ -73,8 +73,6 @@ function App() {
   const [targetChainId, setTargetChainId] = useState(2);
   const [targetAddress, setTargetAddress] = useState("");
 
-  console.log({address, isConnected});
-
   useEffect(() => {
     setThemeMode(theme === "dark" ? "dark" : "light");
   }, [theme]);
