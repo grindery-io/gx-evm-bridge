@@ -107,9 +107,7 @@ function App() {
           throw new Error("Please switch chain to source chain in your wallet")
         }
       }
-      const signer = await new BrowserProvider(
-        walletProvider as any
-      ).getSigner();
+      const signer = await new BrowserProvider(walletProvider).getSigner();
       const wormholeBridgeFee = await gx.wormholeEstimatedFee(
         targetChainId
       );
@@ -130,7 +128,8 @@ function App() {
         ethers.zeroPadValue(await gx.getAddress(), 32),
         { value: wormholeBridgeFee }
       );
-      setBalance(balance - BigInt(bridgeAmount));
+      setBalance(balance - ethers.parseEther(bridgeAmount.toString()));
+      setBridgeAmount(0);
     })().then(
       () =>
         setMessage(
