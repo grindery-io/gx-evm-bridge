@@ -10,12 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@coinbase/wallet-sdk": "^4.1.0",
     "@picocss/pico": "^2.1.1",
     "@radix-ui/react-dropdown-menu": "^2.1.15",
     "@radix-ui/react-slot": "^1.2.3",
-    "@reown/appkit": "^1.0.4",
-    "@reown/appkit-adapter-ethers": "^1.0.4",
+    "@reown/appkit": "^1.7.19",
+    "@reown/appkit-adapter-ethers": "^1.7.19",
     "@tailwindcss/vite": "^4.1.11",
     "axios": "^1.7.7",
     "buffer": "^6.0.3",

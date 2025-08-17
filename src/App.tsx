@@ -8,7 +8,7 @@ import {
   Provider,
 } from "@reown/appkit/react";
 import { EthersAdapter } from "@reown/appkit-adapter-ethers";
-import { polygon, mainnet } from "@reown/appkit/networks";
+import { polygon, mainnet, AppKitNetwork } from "@reown/appkit/networks";
 import { useEffect, useMemo, useState } from "react";
 import { BrowserProvider, ethers } from "ethers";
 import { CATERC20 } from "./CATERC20";
@@ -22,7 +22,7 @@ import { JsonRpcProvider } from "ethers";
 const projectId = "3412d7ac48bc6355f82302fb11dd3679";
 
 // 2. Set the networks
-const networks = [polygon, mainnet];
+const networks = [polygon, mainnet] as [AppKitNetwork, ...AppKitNetwork[]];
 
 // 3. Create a metadata object - optional
 const metadata = {
