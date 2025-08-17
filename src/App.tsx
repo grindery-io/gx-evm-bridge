@@ -93,7 +93,7 @@ function App() {
         "method": "eth_chainId",
         "params": [],
       }));
-      if (providerChainId !== network.chainId) {
+      if (providerChainId !== Number(network.chainId)) {
         try {
           await walletProvider.request({
             "method": "wallet_switchEthereumChain",
@@ -130,6 +130,7 @@ function App() {
         ethers.zeroPadValue(await gx.getAddress(), 32),
         { value: wormholeBridgeFee }
       );
+      setBalance(balance - BigInt(bridgeAmount));
     })().then(
       () =>
         setMessage(
