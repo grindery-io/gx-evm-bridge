@@ -250,6 +250,16 @@ function App() {
               </div>
             </>
           )}
+          <p className="mt-3 text-xs text-muted-foreground">
+            <a
+              href="https://grindery.notion.site/Bridge-GX-from-TON-to-Polygon-Instructions-256ac36be63f8094828ac571e9955bfc"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary hover:underline"
+            >
+              Instructions to Bridge GX from TON to Polygon
+            </a>
+          </p>
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
           <a
